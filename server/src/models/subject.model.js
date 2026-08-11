@@ -9,6 +9,13 @@ const subjectSchema = new mongoose.Schema(
       maxlength: 100,
     },
 
+    normalizedName: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 100,
+    },
+
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -19,6 +26,11 @@ const subjectSchema = new mongoose.Schema(
   {
     timestamps: true,
   }
+);
+
+subjectSchema.index(
+  { userId: 1, normalizedName: 1 },
+  { unique: true }
 );
 
 const Subject = mongoose.model("Subject", subjectSchema);
