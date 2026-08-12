@@ -15,7 +15,7 @@ const labQuestionSchema = new mongoose.Schema(
       default: null,
     },
 
-    screenshot: {
+    ops: {
       url: {
         type: String,
         trim: true,
