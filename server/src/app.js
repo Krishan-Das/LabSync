@@ -2,14 +2,15 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 
+import config from "./config/config.js";
 import authRouter from "./routes/auth.routes.js";
 import subjectRouter from "./routes/subject.routes.js";
 import questionRouter from "./routes/question.routes.js";
 const app = express();
 
 // --- CORS ---
-const allowedOrigin = process.env.NODE_ENV === "production"
-    ? "https://lab-sync.vercel.app"
+const allowedOrigin = config.NODE_ENV === "production"
+    ? config.CLIENT_URL
     : true;
 
 app.use(
