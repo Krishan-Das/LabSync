@@ -1,5 +1,7 @@
 # LabSync
 
+![LabSync Home Page](./screenshots/Lab-Sync_Home.png)
+
 **LabSync — Your lab work, synced everywhere.**
 
 LabSync is a personal web application designed to make college lab work easier to manage.
