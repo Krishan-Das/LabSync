@@ -1,7 +1,7 @@
-import AppRoutes from "./routes/AppRoutes";
+import AppLayout from "./layouts/AppLayout";
 
-const App = () => {
-  return <AppRoutes />;
-};
+function App() {
+  return <AppLayout />;
+}
 
 export default App;
