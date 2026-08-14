@@ -4,7 +4,7 @@ import { ArrowUpRight } from "lucide-react";
 export default function SubjectCard({ subject, onSelect }) {
   return (
     <div
-      onClick={() => onSelect && onSelect(subject.id)}
+      onClick={() => onSelect && onSelect(subject)}
       className="group relative flex flex-col justify-between bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 p-5 shadow-xs hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-200 cursor-pointer min-h-[120px]"
     >
       <div>
