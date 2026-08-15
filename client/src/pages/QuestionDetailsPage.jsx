@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { 
-  ArrowLeft, Calendar, BookOpen, Code2, Copy, Check, 
-  Image as ImageIcon, Edit2, X, Upload 
+import {
+  ArrowLeft, Calendar, BookOpen, Code2, Copy, Check,
+  Image as ImageIcon, Edit2, X, Upload, Trash2
 } from "lucide-react";
 import toast from "react-hot-toast";
 import axiosInstance from "../api/axiosInstance";
@@ -13,7 +13,7 @@ export default function QuestionDetailsPage({ questionId, onBack }) {
   const [question, setQuestion] = useState(null);
   const [subjects, setSubjects] = useState([]);
   const [copied, setCopied] = useState(false);
-  
+
   // Edit Modal State
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editFormData, setEditFormData] = useState({
@@ -33,7 +33,6 @@ export default function QuestionDetailsPage({ questionId, onBack }) {
       const res = await axiosInstance.get(`${API_BASE_URL}/api/question/${questionId}`);
       const data = res.data?.question || res.data;
       setQuestion(data);
-      
 
       // Pre-fill Edit Form Data
       setEditFormData({
@@ -76,7 +75,26 @@ export default function QuestionDetailsPage({ questionId, onBack }) {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Update Submit Handler
+  const handleDeleteQuestion = async () => {
+    const isConfirmed = window.confirm("Are you sure you want to delete this question?");
+    if (!isConfirmed) return;
+
+    showLoader("Deleting question...");
+    try {
+      const res = await axiosInstance.delete(`${API_BASE_URL}/api/question/${questionId}`);
+      if (res.data?.success || res.status === 200) {
+        toast.success(res.data?.message || "Question deleted successfully!");
+        setQuestion(null);
+        if (onBack) onBack();
+      }
+    } catch (err) {
+      console.error("Error deleting question:", err);
+      toast.error(err.response?.data?.message || "Failed to delete question");
+    } finally {
+      hideLoader();
+    }
+  };
+
   const handleUpdateSubmit = async (e) => {
     e.preventDefault();
     showLoader("Updating question...");
@@ -102,7 +120,7 @@ export default function QuestionDetailsPage({ questionId, onBack }) {
       if (res.data?.success || res.status === 200) {
         toast.success("Question updated successfully!");
         setIsEditOpen(false);
-        fetchQuestionDetails(); // Reload details
+        await fetchQuestionDetails(); 
       }
     } catch (err) {
       console.error("Error updating question:", err);
@@ -116,7 +134,7 @@ export default function QuestionDetailsPage({ questionId, onBack }) {
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 pb-12">
-      {/* Top Controls: Back & Edit Button */}
+      {/* Top Controls: Back, Edit & Delete Buttons */}
       <div className="flex items-center justify-between">
         <button
           onClick={onBack}
@@ -126,95 +144,108 @@ export default function QuestionDetailsPage({ questionId, onBack }) {
           <span>Back to Questions</span>
         </button>
 
-        <button
-          onClick={() => setIsEditOpen(true)}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-medium transition-all shadow-xs cursor-pointer"
-        >
-          <Edit2 className="w-3.5 h-3.5" />
-          <span>Edit Question</span>
-        </button>
+        {/* Action Group */}
+        <div className="flex items-center gap-2">
+          {/* 🟢 Delete Button */}
+          <button
+            onClick={handleDeleteQuestion}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 dark:bg-red-950/40 dark:hover:bg-red-900/60 text-red-600 dark:text-red-400 text-xs sm:text-sm font-medium transition-all border border-red-200 dark:border-red-900/50 cursor-pointer"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            <span>Delete</span>
+          </button>
+
+          {/* Edit Button */}
+          <button
+            onClick={() => setIsEditOpen(true)}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-medium transition-all shadow-xs cursor-pointer"
+          >
+            <Edit2 className="w-3.5 h-3.5" />
+            <span>Edit Question</span>
+          </button>
+        </div>
       </div>
 
       {/* Main Container */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-xl p-5 sm:p-7 shadow-xs space-y-6">
-  
-  {/* Header Info */}
-  <div className="space-y-3 pb-4 border-b border-slate-100 dark:border-slate-800">
-    <div className="flex flex-wrap items-center gap-2">
-      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 text-xs font-semibold">
-        <BookOpen className="w-3.5 h-3.5" />
-        {question.subjectId?.name || "General"}
-      </span>
-      {question.labDate && (
-        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-medium">
-          <Calendar className="w-3.5 h-3.5" />
-          {new Date(question.labDate).toLocaleDateString("en-US", {
-            month: "short",
-            day: "numeric",
-            year: "numeric",
-          })}
-        </span>
-      )}
-    </div>
 
-    <h1 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100 leading-snug">
-      {question.question}
-    </h1>
-  </div>
+        {/* Header Info */}
+        <div className="space-y-3 pb-4 border-b border-slate-100 dark:border-slate-800">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 text-xs font-semibold">
+              <BookOpen className="w-3.5 h-3.5" />
+              {question.subjectId?.name || "General"}
+            </span>
+            {question.labDate && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-medium">
+                <Calendar className="w-3.5 h-3.5" />
+                {new Date(question.labDate).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                })}
+              </span>
+            )}
+          </div>
 
-  {/* Main Content Grid: Image + Code */}
-  <div className={`grid grid-cols-1 ${question.ops?.url && question.code ? "lg:grid-cols-2" : "grid-cols-1"} gap-6 items-start`}>
-    
-    {/* Left Side: Attached Screenshot / Ops Image */}
-    {question.ops?.url && (
-      <div className="space-y-2 w-full">
-        <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-          <ImageIcon className="w-4 h-4 text-slate-400" />
-          Attachment
-        </h3>
-        <div className="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-2">
-          <img
-            src={question.ops?.url}
-            alt="Question preview"
-            className="w-full max-h-[500px] object-contain mx-auto rounded"
-          />
+          <h1 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100 leading-snug">
+            {question.question}
+          </h1>
+        </div>
+
+        {/* Main Content Grid: Image + Code */}
+        <div className={`grid grid-cols-1 ${question.ops?.url && question.code ? "lg:grid-cols-2" : "grid-cols-1"} gap-6 items-start`}>
+
+          {/* Left Side: Attached Screenshot / Ops Image */}
+          {question.ops?.url && (
+            <div className="space-y-2 w-full">
+              <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                <ImageIcon className="w-4 h-4 text-slate-400" />
+                Attachment
+              </h3>
+              <div className="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-2">
+                <img
+                  src={question.ops?.url}
+                  alt="Question preview"
+                  className="w-full max-h-[500px] object-contain mx-auto rounded"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Right Side: Code Snippet Section */}
+          {question.code && (
+            <div className="space-y-2 w-full">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                  <Code2 className="w-4 h-4 text-slate-400" />
+                  Solution / Code
+                </h3>
+                <button
+                  onClick={handleCopyCode}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-medium transition-colors cursor-pointer"
+                >
+                  {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                  <span>{copied ? "Copied" : "Copy Code"}</span>
+                </button>
+              </div>
+
+              <div className="relative rounded-xl overflow-hidden border border-slate-800 bg-slate-950 text-slate-100 font-mono text-xs sm:text-sm p-4">
+                <pre className="overflow-x-auto max-h-[500px] leading-relaxed">
+                  <code>{question.code}</code>
+                </pre>
+              </div>
+            </div>
+          )}
+
         </div>
       </div>
-    )}
 
-    {/* Right Side: Code Snippet Section */}
-    {question.code && (
-      <div className="space-y-2 w-full">
-        <div className="flex items-center justify-between">
-          <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-            <Code2 className="w-4 h-4 text-slate-400" />
-            Solution / Code
-          </h3>
-          <button
-            onClick={handleCopyCode}
-            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-medium transition-colors cursor-pointer"
-          >
-            {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
-            <span>{copied ? "Copied" : "Copy Code"}</span>
-          </button>
-        </div>
-
-        <div className="relative rounded-xl overflow-hidden border border-slate-800 bg-slate-950 text-slate-100 font-mono text-xs sm:text-sm p-4">
-          <pre className="overflow-x-auto max-h-[500px] leading-relaxed">
-            <code>{question.code}</code>
-          </pre>
-        </div>
-      </div>
-    )}
-
-  </div>
-</div>
-
-      {/* 🟢 EDIT QUESTION MODAL */}
+      {/* EDIT QUESTION MODAL */}
       {isEditOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl p-6 space-y-4">
-            
+
             {/* Modal Header */}
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
               <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">
@@ -230,7 +261,7 @@ export default function QuestionDetailsPage({ questionId, onBack }) {
 
             {/* Form */}
             <form onSubmit={handleUpdateSubmit} className="space-y-4">
-              
+
               {/* Question Text */}
               <div>
                 <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">

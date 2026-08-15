@@ -14,10 +14,15 @@ import SubjectPage from "./SubjectPage";
 import axiosInstance from "../api/axiosInstance";
 
 import { useLoader } from "../context/LoaderContext";
+import { useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export default function HomePage({ onSelectSubject, onSelectCode }) {
+
+  const { user, isAuthenticated } = useContext(AuthContext);
+
   const [subjects, setSubjects] = useState([]);
   const [recentCodes, setRecentCodes] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -40,7 +45,6 @@ export default function HomePage({ onSelectSubject, onSelectCode }) {
       const fetchedSubjects = subjectsRes.data?.subjects || [];
       const fetchedQuestions = questionsRes.data?.questions || [];
 
-      // Calculate programsCount per subject
       const subjectsWithCount = fetchedSubjects.map((sub) => {
         const count = fetchedQuestions.filter(
           (q) => (q.subjectId?._id || q.subjectId) === sub._id
@@ -58,15 +62,15 @@ export default function HomePage({ onSelectSubject, onSelectCode }) {
         subject: q.subjectId?.name || "General",
         date: q.labDate
           ? new Date(q.labDate).toLocaleDateString("en-US", {
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-            })
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+          })
           : new Date(q.createdAt).toLocaleDateString("en-US", {
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-            }),
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+          }),
         rawQuestion: q,
       }));
 
@@ -81,10 +85,16 @@ export default function HomePage({ onSelectSubject, onSelectCode }) {
   };
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (isAuthenticated && user) {
+      fetchData();
+    } else {
+      setSubjects([]);
+      setRecentCodes([]);
+      setSelectedSubject(null);
+      setSelectedQuestionId(null);
+    }
+  }, [user, isAuthenticated]);
 
-  // Keyboard shortcut listener for Modals
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === "Escape") {
@@ -96,7 +106,6 @@ export default function HomePage({ onSelectSubject, onSelectCode }) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // Handlers for Modals
   const handleAddSubjectSubmit = async (formData) => {
     showLoader("Adding new subject...");
     try {
@@ -112,6 +121,29 @@ export default function HomePage({ onSelectSubject, onSelectCode }) {
       hideLoader();
     }
   };
+
+  const handleDeleteSubject = async (subject) => {
+  const isConfirmed = window.confirm(
+    `Are you sure you want to delete "${subject.name}"?`
+  );
+  if (!isConfirmed) return;
+
+  showLoader("Deleting subject...");
+  try {
+    const res = await axiosInstance.delete(
+      `${API_BASE_URL}/api/subject/${subject._id || subject.id}`
+    );
+    if (res.data?.success || res.status === 200) {
+      toast.success(res.data?.message || "Subject deleted successfully!");
+      fetchData(); 
+    }
+  } catch (err) {
+    console.error("Error deleting subject:", err);
+    toast.error(err.response?.data?.message || "Failed to delete subject");
+  } finally {
+    hideLoader();
+  }
+};
 
   const handleAddQuestionSubmit = async (formData) => {
     showLoader("Adding new question & code...");
@@ -147,12 +179,14 @@ export default function HomePage({ onSelectSubject, onSelectCode }) {
     subject.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // 1. Question Details Page Priority
   if (selectedQuestionId) {
     return (
       <QuestionDetailsPage
         questionId={selectedQuestionId}
-        onBack={() => setSelectedQuestionId(null)}
+        onBack={() => {
+          setSelectedQuestionId(null);
+          fetchData(); 
+        }}
       />
     );
   }
@@ -164,7 +198,7 @@ export default function HomePage({ onSelectSubject, onSelectCode }) {
         subject={selectedSubject}
         onBack={() => {
           setSelectedSubject(null);
-          fetchData(); // 🟢 ব্যাক করলে হোমপেজের ডেটা আপডেট হবে
+          fetchData(); 
         }}
       />
     );
@@ -223,6 +257,7 @@ export default function HomePage({ onSelectSubject, onSelectCode }) {
               key={subject._id}
               subject={subject}
               onSelect={handleCardSelectSubject}
+              onDelete={handleDeleteSubject}
             />
           ))}
         </div>

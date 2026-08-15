@@ -142,7 +142,7 @@ export default function AddQuestionModal({ isOpen, onClose, subjects = [], onSub
               rows={6}
               value={formData.code}
               onChange={(e) => setFormData({ ...formData, code: e.target.value })}
-              className="w-full p-4 font-mono text-xs rounded-lg bg-slate-900 text-slate-100"
+              className="w-full p-4 font-mono text-xs rounded-lg bg-slate-50 dark:bg-slate-800/60"
             />
           </div>
 
@@ -167,8 +167,8 @@ export default function AddQuestionModal({ isOpen, onClose, subjects = [], onSub
           {questionError && <p className="text-xs text-red-500">{questionError}</p>}
 
           <div className="flex justify-end gap-2 pt-3 border-t">
-            <button type="button" onClick={onClose} className="px-4 py-2 text-xs rounded-lg border">Cancel</button>
-            <button type="submit" disabled={isSubmitting} className="px-5 py-2 text-xs rounded-lg bg-blue-600 text-white">
+            <button type="button" onClick={onClose} className="px-4 py-2 text-xs rounded-lg border cursor-pointer">Cancel</button>
+            <button type="submit" disabled={isSubmitting} className="px-5 py-2 text-xs rounded-lg bg-blue-600 text-white cursor-pointer">
               {isSubmitting ? "Adding..." : "Add Question"}
             </button>
           </div>
