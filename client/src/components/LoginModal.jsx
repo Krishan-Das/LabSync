@@ -80,7 +80,7 @@ export default function LoginModal({ isOpen, onClose }) {
           onClick={onClose}
           type="button"
           disabled={isSubmitting}
-          className="absolute top-4 right-4 p-2 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors disabled:opacity-50"
+          className="absolute top-4 right-4 p-2 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
@@ -166,7 +166,7 @@ export default function LoginModal({ isOpen, onClose }) {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full !mt-5 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-sm font-medium transition-all shadow-sm hover:shadow active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-blue-500/20 disabled:opacity-70 disabled:cursor-not-allowed"
+            className="w-full !mt-5 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-sm font-medium transition-all shadow-sm hover:shadow active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-blue-500/20 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
           >
             {isSubmitting ? (
               <>
@@ -196,7 +196,7 @@ export default function LoginModal({ isOpen, onClose }) {
                 type="button"
                 disabled={isSubmitting}
                 onClick={() => switchMode("signup")}
-                className="font-semibold text-blue-600 dark:text-blue-400 hover:underline focus:outline-none"
+                className="font-semibold text-blue-600 dark:text-blue-400 hover:underline focus:outline-none cursor-pointer"
               >
                 Create account
               </button>
@@ -208,7 +208,7 @@ export default function LoginModal({ isOpen, onClose }) {
                 type="button"
                 disabled={isSubmitting}
                 onClick={() => switchMode("login")}
-                className="font-semibold text-blue-600 dark:text-blue-400 hover:underline focus:outline-none"
+                className="font-semibold text-blue-600 dark:text-blue-400 hover:underline focus:outline-none cursor-pointer"
               >
                 Log in
               </button>

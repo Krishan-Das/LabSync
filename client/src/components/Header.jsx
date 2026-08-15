@@ -71,7 +71,7 @@ export default function Header() {
               <button
                 onClick={() => setIsMenuOpen((prev) => !prev)}
                 type="button"
-                className="flex items-center gap-2.5 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/70 border border-transparent hover:border-slate-200 dark:hover:border-slate-800 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                className="flex items-center gap-2.5 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/70 border border-transparent hover:border-slate-200 dark:hover:border-slate-800 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-blue-500/20 cursor-pointer"
                 aria-expanded={isMenuOpen}
                 aria-haspopup="true"
               >
@@ -155,7 +155,7 @@ export default function Header() {
                 onClick={toggleTheme}
                 type="button"
                 aria-label="Toggle theme"
-                className="p-2 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 border border-slate-200/80 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800/60 active:scale-95 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                className="p-2 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 border border-slate-200/80 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800/60 active:scale-95 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-blue-500/20 cursor-pointer"
               >
                 {theme === "dark" ? (
                   <Sun className="w-4 h-4 text-amber-400" />
@@ -167,7 +167,7 @@ export default function Header() {
               <button
                 onClick={() => setIsLoginModalOpen(true)}
                 type="button"
-                className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs sm:text-sm font-medium transition-all shadow-sm"
+                className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs sm:text-sm font-medium transition-all shadow-sm cursor-pointer"
               >
                 <LogIn className="w-4 h-4" />
                 <span>Log in</span>
