@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { Outlet } from "react-router-dom"; // Outlet Import করুন
+import { Outlet } from "react-router-dom"; 
 import Header from "../components/Header";
 import LoginModal from "../components/LoginModal";
+import { Link } from "react-router-dom";
 
 export default function AppLayout() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -29,20 +30,30 @@ export default function AppLayout() {
         onLogout={handleLogout}
       />
 
-      {/* Main Content Area - Outlet ব্যবহার করায় যেকোনো চাইল্ড পেজ (HomePage / PdfEditor) এখানে লোড হবে */}
       <main className="flex-1 w-full">
         <Outlet />
       </main>
 
       {/* Footer */}
       <footer className="w-full border-t border-slate-200/60 dark:border-slate-800/80 bg-white dark:bg-slate-900/50 py-6 transition-colors duration-200">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 dark:text-slate-400 gap-2">
-          <p>© {new Date().getFullYear()} LabSync. All rights reserved.</p>
-          <p>Lab work, organized.</p>
-        </div>
-      </footer>
+  <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 dark:text-slate-400 gap-3">
+    
+    <p>© {new Date().getFullYear()} LabSync. All rights reserved.</p>
 
-      {/* Login Popup Modal */}
+    <div className="flex items-center gap-4">
+      <Link
+        to="/about"
+        className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+      >
+        About
+      </Link>
+
+      <span>Lab work, organized.</span>
+    </div>
+
+  </div>
+</footer>
+
       <LoginModal
         isOpen={isLoginModalOpen}
         onClose={() => setIsLoginModalOpen(false)}

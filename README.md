@@ -1,24 +1,35 @@
 # LabSync
 
-![LabSync Home Page](./screenshots/Lab-Sync_Home.png)
+<div align="center">
+  <img src="./screenshots/Lab_Sync_Home.png" alt="LabSync Home Page" width="48%" />
+  <img src="./screenshots/Lab_Sync_Editor.png" alt="LabSync Output Editor" width="48%" />
+</div>
+
+<br>
 
 **LabSync — Your lab work, synced everywhere.**
 
 LabSync is a personal web application designed to make college lab work easier to manage.
 
-Instead of taking screenshots in the lab and later repeating the same work at home just to get the output screenshot, LabSync lets you save your **code, output screenshots, and daily lab work** in one place and access them from your phone or any other device.
+Instead of taking screenshots in the lab and later repeating the same work at home just to prepare your lab record, LabSync lets you save your **code, output screenshots, and daily lab work** in one place.
+
+It also includes an **Output Editor** that lets you quickly arrange screenshots into a clean, print-ready format using predefined templates.
 
 ## Problem
+
 
 During college lab classes, you may need to:
 
 1. Write and run code on a lab computer.
 2. Get the required output.
 3. Take screenshots.
-4. Save those screenshots for your lab record.
-5. Later repeat the work at home because the screenshots are still on the lab computer.
+4. Save those screenshots.
+5. Later prepare and arrange the screenshots for your lab record.
+6. Sometimes repeat the work at home because the screenshots or code are not easily accessible.
 
-LabSync is built to eliminate that unnecessary second step.
+The problem isn't just storing screenshots — **preparing them for submission and printing can also be tedious.**
+
+LabSync is built to simplify the entire process.
 
 ## Solution
 
@@ -36,46 +47,62 @@ LabSync
 Cloud Storage
      ↓
 Access From Mobile / Home
+     ↓
+Output Editor
+     ↓
+Choose Template
+     ↓
+Automatically Arrange Output
+     ↓
+Print-Ready Result
 ```
 
-Your lab work stays organized by day and program.
+Your lab work stays organized, while your output screenshots can be quickly converted into a clean format for printing.
 
 ## Features
 
 * 🔐 User authentication
 * 💻 Save source code
 * 📸 Upload output screenshots
-* 📱 Access lab work from mobile
-* 🔗 Organized program records
-* 🗂️ View previous lab sessions
+* 📱 Access lab work from mobile or other devices
+* 🗂️ Organize programs by lab date
+* 🔗 View previous lab sessions
+* 🖼️ Output Editor for arranging screenshots
+* ⚡ One-click output templates
+* 📐 Resize and reposition output screenshots
+* 🖨️ Generate clean, print-ready output layouts
 * 🗑️ Delete unwanted submissions
 * 🔒 User-specific private data
 
-## Example Structure
+## Output Editor
+
+LabSync includes an **Output Editor** specifically designed for lab record preparation.
+
+Instead of manually editing screenshots in another application, users can:
+
+1. Select a saved program.
+2. Open its output in the editor.
+3. Choose a predefined layout/template.
+4. Automatically arrange the output screenshot.
+5. Adjust the screenshot size and position if needed.
+6. Generate a clean layout ready for printing.
+
+The goal is simple:
 
 ```text
-LabSync
-│
-├── 10 Aug 2026
-│   ├── Program 1
-│   │   ├── Code
-│   │   └── Output Screenshot
-│   │
-│   ├── Program 2
-│   │   ├── Code
-│   │   └── Output Screenshot
-│   │
-│   └── Program 3
-│       ├── Code
-│       └── Output Screenshot
-│
-├── 08 Aug 2026
-│   ├── Program 1
-│   └── Program 2
-│
-└── 07 Aug 2026
-    └── Program 1
+Screenshot
+    ↓
+Choose Template
+    ↓
+One-Click Layout
+    ↓
+Adjust if Needed
+    ↓
+Print
 ```
+
+This removes the need for external image-editing software for basic lab output preparation.
+
 
 ## Tech Stack
 
@@ -92,7 +119,7 @@ LabSync
 * Express.js
 * MongoDB
 * JWT Authentication
-
+* ImageKit
 
 ## Future Plans
 
@@ -100,10 +127,8 @@ LabSync
 * Automatic screenshot upload
 * Code editor
 * Syntax highlighting
-* Search lab programs
-* Filter by subject/date
-* Export lab records
-* PDF generation
+* Export complete lab records
+* More output templates
 * Multiple device synchronization
 * Offline support
 
@@ -111,7 +136,7 @@ LabSync
 
 🚧 **Currently in development**
 
-LabSync is being developed as a practical project to solve a real problem encountered during college laboratory classes.
+LabSync is being developed as a practical application to solve real problems encountered during college laboratory classes — from **saving lab work to preparing output for submission and printing**.
 
 ## Author
 

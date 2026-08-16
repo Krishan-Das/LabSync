@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback, useContext } from "react";
-import { BookOpen, FolderCheck, Plus, RotateCcw, Crop, Trash2, Undo, Redo, Image as ImageIcon, Download, X, Home } from "lucide-react";
+import { BookOpen, FolderCheck, Plus, RotateCcw, Crop, Trash2, Undo, Redo, Image as ImageIcon, Download, X, Home, Sun, Moon } from "lucide-react";
 import toast from "react-hot-toast";
 import jsPDF from "jspdf";
 import { Link } from "react-router-dom";
@@ -13,6 +13,7 @@ import SavedQuestionsModal from "../components/pdf-editor/SavedQuestionsModal";
 
 import { useLoader } from "../context/LoaderContext";
 import { AuthContext } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
 
 const getScaledDimensions = (imgWidth, imgHeight, crop = { width: 1, height: 1 }, targetWidth = 320) => {
   const croppedPixelWidth = imgWidth * crop.width;
@@ -25,7 +26,7 @@ const getScaledDimensions = (imgWidth, imgHeight, crop = { width: 1, height: 1 }
   };
 };
 
-const HeaderPlaceholder = () => (
+const HeaderPlaceholder = ({ toggleTheme, theme }) => (
   <header className="h-14 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-6 flex items-center justify-between z-10 shadow-xs">
     {/* Left Section: Logo & Title */}
     <div className="flex items-center space-x-2.5">
@@ -42,18 +43,34 @@ const HeaderPlaceholder = () => (
       </span>
     </div>
 
-    <Link
-      to="/"
-      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors border border-slate-200 dark:border-slate-700"
-    >
-      <Home className="w-3.5 h-3.5" />
-      <span>Go to Home</span>
-    </Link>
+    {/* Right Section: Theme Toggle & Home */}
+    <div className="flex items-center space-x-3">
+      <button
+        onClick={toggleTheme}
+        className="p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors border border-slate-200 dark:border-slate-700 cursor-pointer"
+        aria-label="Toggle Theme"
+      >
+        {theme === "dark" ? (
+          <Sun className="w-4 h-4 text-amber-400" />
+        ) : (
+          <Moon className="w-4 h-4 text-slate-700" />
+        )}
+      </button>
+
+      <Link
+        to="/"
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors border border-slate-200 dark:border-slate-700"
+      >
+        <Home className="w-3.5 h-3.5" />
+        <span>Go to Home</span>
+      </Link>
+    </div>
   </header>
 );
 
 export default function PdfEditor() {
   const { user, isAuthenticated } = useContext(AuthContext);
+  const { theme, toggleTheme } = useTheme();
   const { showLoader, hideLoader } = useLoader();
 
   const [documentState, setDocumentState] = useState({
@@ -489,7 +506,7 @@ export default function PdfEditor() {
       />
 
       {/* Header */}
-      <HeaderPlaceholder />
+      <HeaderPlaceholder toggleTheme={toggleTheme} theme={theme} />
 
       {/* Workspace */}
       <div className="flex flex-1 relative overflow-hidden">
