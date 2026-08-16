@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { BookOpen, FolderCheck, Search, Plus, FileCode2, Inbox } from "lucide-react";
 import toast from "react-hot-toast";
 
-// Components Import
+// Components 
 import HeroBanner from "../components/HeroBanner";
 import StatCard from "../components/StatCard";
 import SubjectCard from "../components/SubjectCard";

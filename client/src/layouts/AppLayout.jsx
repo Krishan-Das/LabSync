@@ -1,6 +1,6 @@
 import React, { useState } from "react";
+import { Outlet } from "react-router-dom"; // Outlet Import করুন
 import Header from "../components/Header";
-import HomePage from "../pages/HomePage";
 import LoginModal from "../components/LoginModal";
 
 export default function AppLayout() {
@@ -8,18 +8,12 @@ export default function AppLayout() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [user, setUser] = useState({ name: "", email: "" });
 
-  // Login Complete handler
-  // AppLayout.jsx er bhitor
   const handleAuthSubmit = (userData, mode) => {
     setUser(userData);
     setIsLoggedIn(true);
     console.log(`User ${mode === "login" ? "logged in" : "registered"}:`, userData);
   };
 
-  // Return JSX inside AppLayout:
-
-
-  // Logout handler
   const handleLogout = () => {
     setIsLoggedIn(false);
     setUser({ name: "", email: "" });
@@ -35,9 +29,9 @@ export default function AppLayout() {
         onLogout={handleLogout}
       />
 
-      {/* Main Content */}
-      <main className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
-        <HomePage />
+      {/* Main Content Area - Outlet ব্যবহার করায় যেকোনো চাইল্ড পেজ (HomePage / PdfEditor) এখানে লোড হবে */}
+      <main className="flex-1 w-full">
+        <Outlet />
       </main>
 
       {/* Footer */}
