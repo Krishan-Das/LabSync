@@ -24,7 +24,6 @@ export default function SavedQuestionsModal({ isOpen, onClose, onImport }) {
     try {
       const res = await axiosInstance.get("/api/question");
       const data = res.data;
-      console.log("Full API Response:", data);
 
       if (data.success && Array.isArray(data.questions)) {
         setQuestions(data.questions);
