@@ -55,10 +55,12 @@ export const createQuestion = async (req, res) => {
     };
 
     // Screenshot is optional
+    let uploadedFile = null;
+
     if (req.file) {
-      const uploadedFile = await uploadImage(
+      uploadedFile = await uploadImage(
         req.file,
-        "ops"
+        `screenshots/${req.user._id}`
       );
 
       ops = {
@@ -67,14 +69,31 @@ export const createQuestion = async (req, res) => {
       };
     }
 
-    const labQuestion = await LabQuestion.create({
-      question: question.trim(),
-      code: code?.trim() || null,
-      ops,
-      subjectId,
-      userId: req.user._id,
-      labDate,
-    });
+    let labQuestion;
+
+    try {
+      labQuestion = await LabQuestion.create({
+        question: question.trim(),
+        code: code?.trim() || null,
+        ops,
+        subjectId,
+        userId: req.user._id,
+        labDate,
+      });
+    } catch (dbError) {
+      if (uploadedFile?.fileId) {
+        try {
+          await deleteImage(uploadedFile.fileId);
+        } catch (deleteError) {
+          console.error(
+            "ImageKit cleanup error:",
+            deleteError.message
+          );
+        }
+      }
+
+      throw dbError;
+    }
 
     return res.status(201).json({
       message: "Question created successfully",
@@ -236,7 +255,7 @@ export const updateQuestion = async (req, res) => {
     if (req.file) {
       const uploadedFile = await uploadImage(
         req.file,
-        "ops"
+        `screenshots/${req.user._id}`
       );
 
       const oldFileId = labQuestion.ops?.fileId;
