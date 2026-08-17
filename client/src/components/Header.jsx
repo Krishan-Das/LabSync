@@ -13,6 +13,7 @@ import {
 import { useTheme } from "../context/ThemeContext";
 import { AuthContext } from "../context/AuthContext";
 import LoginModal from "./LoginModal";
+import ProfileModal from "./ProfileModal";
 
 export default function Header() {
   const { theme, toggleTheme } = useTheme();
@@ -20,6 +21,7 @@ export default function Header() {
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false); // for profile model
   const menuRef = useRef(null);
 
   useEffect(() => {
@@ -77,8 +79,16 @@ export default function Header() {
                 aria-haspopup="true"
               >
                 {/* User Avatar */}
-                <div className="h-8 w-8 rounded-md bg-blue-600 text-white font-semibold text-xs flex items-center justify-center shadow-sm">
-                  {initials}
+                <div className="h-8 w-8 rounded-md bg-blue-600 text-white font-semibold text-xs flex items-center justify-center shadow-sm overflow-hidden">
+                  {user?.avatar?.url ? (
+                    <img
+                      src={user.avatar.url}
+                      alt={user?.name || "User"}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    initials
+                  )}
                 </div>
 
                 {/* User Name & Role */}
@@ -108,14 +118,17 @@ export default function Header() {
                   </div>
 
                   <div className="py-1">
-                    <Link
-                      to="/profile"
-                      onClick={() => setIsMenuOpen(false)}
-                      className="w-full text-left px-3.5 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2.5 transition-colors"
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsMenuOpen(false);
+                        setIsProfileModalOpen(true);
+                      }}
+                      className="w-full text-left px-3.5 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2.5 transition-colors cursor-pointer"
                     >
                       <User className="w-4 h-4 text-slate-400 dark:text-slate-500" />
                       <span>Profile</span>
-                    </Link>
+                    </button>
 
                     {/* Output Editor Link */}
                     <Link
@@ -193,6 +206,14 @@ export default function Header() {
         isOpen={isLoginModalOpen}
         onClose={() => setIsLoginModalOpen(false)}
       />
+
+      {/* 3. Render ProfileModal at the bottom */}
+      <ProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+        user={user}
+      />
+
     </>
   );
 }

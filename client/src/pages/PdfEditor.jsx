@@ -83,7 +83,7 @@ export default function PdfEditor() {
 
   const [selectedId, setSelectedId] = useState(null);
   const [copiedElement, setCopiedElement] = useState(null);
-  const [zoom, setZoom] = useState(1);
+  const [zoom, setZoom] = useState(0.5);
   const [isCropping, setIsCropping] = useState(false);
 
   // Saved Questions Modal State
@@ -243,7 +243,6 @@ export default function PdfEditor() {
     }
   };
 
-  // সেভ করা প্রশ্ন থেকে স্ক্রিনশট ইমপোর্ট করার হ্যান্ডলার
   const handleImportFromSaved = async (urls) => {
     if (!urls || urls.length === 0) return;
 
@@ -409,7 +408,6 @@ export default function PdfEditor() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleCopy, handlePaste]);
 
-  // Canvas-এর Image Data URL তৈরি করার মেথড
   const getCanvasImageDataUrl = () => {
     if (!stageRef.current) return null;
     setSelectedId(null); // Selection outline হাইড করা
@@ -418,7 +416,6 @@ export default function PdfEditor() {
     return stageRef.current.toDataURL({ pixelRatio: 2 });
   };
 
-  // 1. PDF Preview modal ওপেন করার জন্য
   const handleOpenPdfPreview = () => {
     const dataUrl = getCanvasImageDataUrl();
     if (dataUrl) {
@@ -427,7 +424,6 @@ export default function PdfEditor() {
     }
   };
 
-  // 2. Preview Modal থেকে PDF কনফার্ম ডাউনলোড করার জন্য
   const handleConfirmSavePdf = () => {
     if (!previewDataUrl) return;
     showLoader?.("Generating A4 PDF...");
@@ -451,7 +447,6 @@ export default function PdfEditor() {
     }
   };
 
-  // 3. সরাসরি Canvas Print করার মেথড
   const handlePrint = () => {
     const dataUrl = getCanvasImageDataUrl();
     if (!dataUrl) return;

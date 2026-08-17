@@ -18,6 +18,17 @@ const userSchema = new mongoose.Schema(
       trim: true,
     },
 
+    avatar: {
+      url: {
+        type: String,
+        default: null,
+      },
+      fileId: {
+        type: String,
+        default: null,
+      },
+    },
+
     password: {
       type: String,
       required: true,

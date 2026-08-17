@@ -24,11 +24,12 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
+  // Login User
   const login = async (credentials) => {
     try {
       const response = await axiosInstance.post("/api/auth/login", credentials);
       if (response.data.success) {
-        setUser(response.data.user); 
+        setUser(response.data.user);
       }
       return response.data;
     } catch (error) {
@@ -39,6 +40,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Register user
   const register = async (userData) => {
     try {
       const response = await axiosInstance.post("/api/auth/register", userData);
@@ -54,13 +56,83 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Logout User
   const logout = async () => {
     try {
       await axiosInstance.post("/api/auth/logout");
     } catch (error) {
       console.error("Logout error:", error);
     } finally {
-      setUser(null); 
+      setUser(null);
+    }
+  };
+
+
+  // Update Profile
+  const updateProfile = async (data) => {
+    try {
+      const response = await axiosInstance.patch(
+        "/api/auth/profile",
+        data
+      );
+      
+
+      if (response.data.success) {
+        setUser(response.data.user);
+      }
+
+      return response.data;
+    } catch (error) {
+      return {
+        success: false,
+        message:
+          error.response?.data?.message || "Profile update failed",
+      };
+    }
+  };
+
+  // Update Avatar
+  const updateAvatar = async (formData) => {
+    try {      
+      const response = await axiosInstance.patch(
+        "/api/auth/avatar",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      if (response.data.success) {
+        setUser(response.data.user);
+      }
+
+      return response.data;
+    } catch (error) {
+      return {
+        success: false,
+        message:
+          error.response?.data?.message || "Avatar update failed",
+      };
+    }
+  };
+
+  // Change Password
+  const changePassword = async (data) => {
+    try {
+      const response = await axiosInstance.patch(
+        "/api/auth/password",
+        data
+      );
+
+      return response.data;
+    } catch (error) {
+      return {
+        success: false,
+        message:
+          error.response?.data?.message || "Password change failed",
+      };
     }
   };
 
@@ -70,6 +142,9 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
+    updateProfile,
+    updateAvatar,
+    changePassword,
     isAuthenticated: !!user,
   };
 

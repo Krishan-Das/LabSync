@@ -1,8 +1,9 @@
-import React, { useEffect, useCallback } from "react";
+import React, { useEffect, useCallback, useRef } from "react";
 import { ZoomIn, ZoomOut } from "lucide-react";
 
 export default function ZoomControls({ zoom, setZoom }) {
   const presets = [0.5, 0.75, 1.0, 1.25, 1.5, 2.0];
+  const initialTouchDistance = useRef(null);
 
   const handleZoomIn = useCallback(() => {
     setZoom((z) => Math.min(2, Math.round((z + 0.1) * 100) / 100));
@@ -12,7 +13,7 @@ export default function ZoomControls({ zoom, setZoom }) {
     setZoom((z) => Math.max(0.4, Math.round((z - 0.1) * 100) / 100));
   }, [setZoom]);
 
-  // Ctrl + Mouse Wheel Scroll Zoom Event Listener
+  // Ctrl + Mouse Wheel Scroll Zoom Event Listener (Desktop)
   useEffect(() => {
     const handleWheel = (e) => {
       if (e.ctrlKey || e.metaKey) {
@@ -27,6 +28,53 @@ export default function ZoomControls({ zoom, setZoom }) {
 
     window.addEventListener("wheel", handleWheel, { passive: false });
     return () => window.removeEventListener("wheel", handleWheel);
+  }, [handleZoomIn, handleZoomOut]);
+
+  // Mobile Pinch-to-Zoom Event Listeners
+  useEffect(() => {
+    const getTouchDistance = (touches) => {
+      return Math.hypot(
+        touches[0].clientX - touches[1].clientX,
+        touches[0].clientY - touches[1].clientY
+      );
+    };
+
+    const handleTouchStart = (e) => {
+      if (e.touches.length === 2) {
+        initialTouchDistance.current = getTouchDistance(e.touches);
+      }
+    };
+
+    const handleTouchMove = (e) => {
+      if (e.touches.length === 2 && initialTouchDistance.current !== null) {
+        e.preventDefault();
+        const currentDistance = getTouchDistance(e.touches);
+        const distanceDifference = currentDistance - initialTouchDistance.current;
+
+        if (Math.abs(distanceDifference) > 10) {
+          if (distanceDifference > 0) {
+            handleZoomIn();
+          } else {
+            handleZoomOut();
+          }
+          initialTouchDistance.current = currentDistance;
+        }
+      }
+    };
+
+    const handleTouchEnd = () => {
+      initialTouchDistance.current = null;
+    };
+
+    window.addEventListener("touchstart", handleTouchStart, { passive: true });
+    window.addEventListener("touchmove", handleTouchMove, { passive: false });
+    window.addEventListener("touchend", handleTouchEnd);
+
+    return () => {
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("touchend", handleTouchEnd);
+    };
   }, [handleZoomIn, handleZoomOut]);
 
   return (

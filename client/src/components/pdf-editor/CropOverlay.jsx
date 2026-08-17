@@ -9,7 +9,7 @@ export default function CropOverlay({ element, onApply, onCancel }) {
 
   const containerRef = useRef(null);
   const activeHandleRef = useRef(null);
-  const dragStartRef = useRef({ mouseX: 0, mouseY: 0, crop: { ...crop } });
+  const dragStartRef = useRef({ clientX: 0, clientY: 0, crop: { ...crop } });
 
   // Apply Inset Preset
   const applyInset = (amount) => {
@@ -21,25 +21,36 @@ export default function CropOverlay({ element, onApply, onCancel }) {
     });
   };
 
-  // Dragging logic for corner & edge handles
-  const handleMouseDown = (e, handle) => {
-    e.stopPropagation();
-    e.preventDefault();
+  // Unified start handler for both Mouse and Touch
+  const handleStart = (clientX, clientY, handle) => {
     activeHandleRef.current = handle;
     dragStartRef.current = {
-      mouseX: e.clientX,
-      mouseY: e.clientY,
+      clientX,
+      clientY,
       crop: { ...crop },
     };
   };
 
-  const handleMouseMove = useCallback(
-    (e) => {
+  const handleMouseDown = (e, handle) => {
+    e.stopPropagation();
+    e.preventDefault();
+    handleStart(e.clientX, e.clientY, handle);
+  };
+
+  const handleTouchStart = (e, handle) => {
+    e.stopPropagation();
+    if (e.touches.length === 1) {
+      handleStart(e.touches[0].clientX, e.touches[0].clientY, handle);
+    }
+  };
+
+  const handleMove = useCallback(
+    (clientX, clientY) => {
       if (!activeHandleRef.current) return;
 
       const handle = activeHandleRef.current;
-      const dx = (e.clientX - dragStartRef.current.mouseX) / element.width;
-      const dy = (e.clientY - dragStartRef.current.mouseY) / element.height;
+      const dx = (clientX - dragStartRef.current.clientX) / element.width;
+      const dy = (clientY - dragStartRef.current.clientY) / element.height;
 
       const initial = dragStartRef.current.crop;
       let newCrop = { ...initial };
@@ -69,35 +80,56 @@ export default function CropOverlay({ element, onApply, onCancel }) {
     [element.width, element.height]
   );
 
-  const handleMouseUp = useCallback(() => {
+  const handleMouseMove = useCallback(
+    (e) => {
+      handleMove(e.clientX, e.clientY);
+    },
+    [handleMove]
+  );
+
+  const handleTouchMove = useCallback(
+    (e) => {
+      if (e.touches.length === 1) {
+        handleMove(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    },
+    [handleMove]
+  );
+
+  const handleEnd = useCallback(() => {
     activeHandleRef.current = null;
   }, []);
 
   useEffect(() => {
     window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", handleMouseUp);
+    window.addEventListener("mouseup", handleEnd);
+    window.addEventListener("touchmove", handleTouchMove, { passive: false });
+    window.addEventListener("touchend", handleEnd);
+
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("mouseup", handleEnd);
+      window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("touchend", handleEnd);
     };
-  }, [handleMouseMove, handleMouseUp]);
+  }, [handleMouseMove, handleTouchMove, handleEnd]);
 
   // Handle Positions for UI rendering
   const handles = [
-    { id: "tl", className: "-top-1.5 -left-1.5 cursor-nwse-resize" },
-    { id: "tm", className: "-top-1.5 left-1/2 -translate-x-1/2 cursor-ns-resize" },
-    { id: "tr", className: "-top-1.5 -right-1.5 cursor-nesw-resize" },
-    { id: "ml", className: "top-1/2 -left-1.5 -translate-y-1/2 cursor-ew-resize" },
-    { id: "mr", className: "top-1/2 -right-1.5 -translate-y-1/2 cursor-ew-resize" },
-    { id: "bl", className: "-bottom-1.5 -left-1.5 cursor-nesw-resize" },
-    { id: "bm", className: "-bottom-1.5 left-1/2 -translate-x-1/2 cursor-ns-resize" },
-    { id: "br", className: "-bottom-1.5 -right-1.5 cursor-nwse-resize" },
+    { id: "tl", className: "-top-2 -left-2 cursor-nwse-resize" },
+    { id: "tm", className: "-top-2 left-1/2 -translate-x-1/2 cursor-ns-resize" },
+    { id: "tr", className: "-top-2 -right-2 cursor-nesw-resize" },
+    { id: "ml", className: "top-1/2 -left-2 -translate-y-1/2 cursor-ew-resize" },
+    { id: "mr", className: "top-1/2 -right-2 -translate-y-1/2 cursor-ew-resize" },
+    { id: "bl", className: "-bottom-2 -left-2 cursor-nesw-resize" },
+    { id: "bm", className: "-bottom-2 left-1/2 -translate-x-1/2 cursor-ns-resize" },
+    { id: "br", className: "-bottom-2 -right-2 cursor-nwse-resize" },
   ];
 
   return (
     <div
       ref={containerRef}
-      className="absolute border-2 border-blue-600 bg-blue-500/15 pointer-events-auto shadow-sm z-20"
+      className="absolute border-2 border-blue-600 bg-blue-500/15 pointer-events-auto shadow-sm z-20 touch-none"
       style={{
         left: `${element.x + crop.x * element.width}px`,
         top: `${element.y + crop.y * element.height}px`,
@@ -111,15 +143,16 @@ export default function CropOverlay({ element, onApply, onCancel }) {
         <div
           key={h.id}
           onMouseDown={(e) => handleMouseDown(e, h.id)}
-          className={`absolute w-3 h-3 bg-white border-2 border-blue-600 rounded-full shadow-md z-30 ${h.className}`}
+          onTouchStart={(e) => handleTouchStart(e, h.id)}
+          className={`absolute w-5 h-5 bg-white border-2 border-blue-600 rounded-full shadow-md z-30 flex items-center justify-center ${h.className}`}
         />
       ))}
 
       {/* Floating Action Controls */}
-      <div className="absolute -top-11 left-0 flex items-center space-x-1 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 p-1 rounded-md shadow-lg z-40 select-none">
+      <div className="absolute -top-12 left-0 flex items-center space-x-1 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 p-1 rounded-md shadow-lg z-40 select-none">
         <button
           onClick={() => applyInset(0)}
-          className="text-[11px] font-medium px-2 py-0.5 rounded hover:bg-gray-100 dark:hover:bg-zinc-800 flex items-center gap-1"
+          className="text-[11px] font-medium px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-zinc-800 flex items-center gap-1 cursor-pointer"
           title="Reset Crop"
         >
           <RotateCcw className="w-3 h-3" />
@@ -127,21 +160,21 @@ export default function CropOverlay({ element, onApply, onCancel }) {
         </button>
         <button
           onClick={() => applyInset(0.05)}
-          className="text-[11px] font-medium px-1.5 py-0.5 rounded hover:bg-gray-100 dark:hover:bg-zinc-800"
+          className="text-[11px] font-medium px-1.5 py-1 rounded hover:bg-gray-100 dark:hover:bg-zinc-800 cursor-pointer"
         >
           -5%
         </button>
         <div className="w-px h-3 bg-gray-200 dark:bg-zinc-700 my-auto" />
         <button
           onClick={() => onApply(crop)}
-          className="p-1 rounded bg-blue-600 text-white hover:bg-blue-700"
+          className="p-1.5 rounded bg-blue-600 text-white hover:bg-blue-700 cursor-pointer"
           title="Apply Crop"
         >
           <Check className="w-3.5 h-3.5" />
         </button>
         <button
           onClick={onCancel}
-          className="p-1 rounded hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-600 dark:text-gray-300"
+          className="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-600 dark:text-gray-300 cursor-pointer"
           title="Cancel"
         >
           <X className="w-3.5 h-3.5" />
