@@ -32,10 +32,13 @@ export default function HomePage({ onSelectSubject, onSelectCode }) {
   const [selectedQuestionId, setSelectedQuestionId] = useState(null);
   const [selectedSubject, setSelectedSubject] = useState(null);
 
+  // FIXED: Global loader-er bodole local data loading state use kora holo jate page freeze na hoy
+  const [isDataLoading, setIsDataLoading] = useState(true);
+
   const { showLoader, hideLoader } = useLoader();
 
   const fetchData = async () => {
-    showLoader("Fetching subjects and questions...");
+    setIsDataLoading(true); // Shudhu data loading state true hobe, page background-e open thakbe
     try {
       const [subjectsRes, questionsRes] = await Promise.all([
         axiosInstance.get(`${API_BASE_URL}/api/subject`),
@@ -62,15 +65,15 @@ export default function HomePage({ onSelectSubject, onSelectCode }) {
         subject: q.subjectId?.name || "General",
         date: q.labDate
           ? new Date(q.labDate).toLocaleDateString("en-US", {
-            month: "short",
-            day: "numeric",
-            year: "numeric",
-          })
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+            })
           : new Date(q.createdAt).toLocaleDateString("en-US", {
-            month: "short",
-            day: "numeric",
-            year: "numeric",
-          }),
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+            }),
         rawQuestion: q,
       }));
 
@@ -80,7 +83,7 @@ export default function HomePage({ onSelectSubject, onSelectCode }) {
       console.error("Error fetching homepage data:", error);
       toast.error(error.response?.data?.message || "Failed to load subjects and questions");
     } finally {
-      hideLoader();
+      setIsDataLoading(false); // Data ana sesh, loading bondho
     }
   };
 
@@ -92,6 +95,7 @@ export default function HomePage({ onSelectSubject, onSelectCode }) {
       setRecentCodes([]);
       setSelectedSubject(null);
       setSelectedQuestionId(null);
+      setIsDataLoading(false);
     }
   }, [user, isAuthenticated]);
 
@@ -123,27 +127,27 @@ export default function HomePage({ onSelectSubject, onSelectCode }) {
   };
 
   const handleDeleteSubject = async (subject) => {
-  const isConfirmed = window.confirm(
-    `Are you sure you want to delete "${subject.name}"?`
-  );
-  if (!isConfirmed) return;
-
-  showLoader("Deleting subject...");
-  try {
-    const res = await axiosInstance.delete(
-      `${API_BASE_URL}/api/subject/${subject._id || subject.id}`
+    const isConfirmed = window.confirm(
+      `Are you sure you want to delete "${subject.name}"?`
     );
-    if (res.data?.success || res.status === 200) {
-      toast.success(res.data?.message || "Subject deleted successfully!");
-      fetchData(); 
+    if (!isConfirmed) return;
+
+    showLoader("Deleting subject...");
+    try {
+      const res = await axiosInstance.delete(
+        `${API_BASE_URL}/api/subject/${subject._id || subject.id}`
+      );
+      if (res.data?.success || res.status === 200) {
+        toast.success(res.data?.message || "Subject deleted successfully!");
+        fetchData(); 
+      }
+    } catch (err) {
+      console.error("Error deleting subject:", err);
+      toast.error(err.response?.data?.message || "Failed to delete subject");
+    } finally {
+      hideLoader();
     }
-  } catch (err) {
-    console.error("Error deleting subject:", err);
-    toast.error(err.response?.data?.message || "Failed to delete subject");
-  } finally {
-    hideLoader();
-  }
-};
+  };
 
   const handleAddQuestionSubmit = async (formData) => {
     showLoader("Adding new question & code...");
@@ -191,7 +195,6 @@ export default function HomePage({ onSelectSubject, onSelectCode }) {
     );
   }
 
-  // 2. Subject Page Priority
   if (selectedSubject) {
     return (
       <SubjectPage
@@ -215,14 +218,14 @@ export default function HomePage({ onSelectSubject, onSelectCode }) {
           iconBgClass="bg-blue-50 dark:bg-blue-950/50"
           iconTextClass="text-blue-600 dark:text-blue-400"
           label="Total Subjects"
-          value={totalSubjects}
+          value={isDataLoading ? "..." : totalSubjects}
         />
         <StatCard
           icon={FolderCheck}
           iconBgClass="bg-emerald-50 dark:bg-emerald-950/50"
           iconTextClass="text-emerald-600 dark:text-emerald-400"
           label="Total Programs"
-          value={totalPrograms}
+          value={isDataLoading ? "..." : totalPrograms}
         />
       </div>
 
@@ -249,8 +252,12 @@ export default function HomePage({ onSelectSubject, onSelectCode }) {
         </button>
       </div>
 
-      {/* Subjects Grid */}
-      {filteredSubjects.length > 0 ? (
+      {/* Subjects Grid - FIXED: Non-blocking loading state */}
+      {isDataLoading ? (
+        <div className="text-center py-12 text-slate-400 text-sm animate-pulse bg-slate-50 dark:bg-slate-900/40 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
+          Server theke data load hocche (Render free server wake up hochhe)...
+        </div>
+      ) : filteredSubjects.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredSubjects.map((subject) => (
             <SubjectCard
@@ -298,7 +305,11 @@ export default function HomePage({ onSelectSubject, onSelectCode }) {
           </button>
         </div>
 
-        {recentCodes.length > 0 ? (
+        {isDataLoading ? (
+          <div className="text-center py-6 text-xs text-slate-400 animate-pulse">
+            Loading recent codes...
+          </div>
+        ) : recentCodes.length > 0 ? (
           <div className="divide-y divide-slate-100 dark:divide-slate-800/60">
             {recentCodes.map((code) => (
               <RecentCodeItem
