@@ -2,6 +2,17 @@ import mongoose from "mongoose";
 
 const labQuestionSchema = new mongoose.Schema(
   {
+    experimentNo: {
+      type: Number,
+      default: null,
+      validate: {
+        validator: function (v) {
+          return v === null || v >= 1;
+        },
+        message: "Experiment number must be at least 1."
+      }
+    },
+
     question: {
       type: String,
       required: true,
@@ -27,6 +38,13 @@ const labQuestionSchema = new mongoose.Schema(
         trim: true,
         default: null,
       },
+    },
+
+    notes: {
+      type: String,
+      trim: true,
+      maxlength: 1000,
+      default: null,
     },
 
     subjectId: {

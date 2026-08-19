@@ -6,7 +6,7 @@ import { uploadImage, deleteImage } from "../services/imagekit.service.js";
 
 // Create question
 export const createQuestion = async (req, res) => {
-  const { question, code, subjectId, labDate } = req.body;
+  const { experimentNo, question, code, subjectId, labDate } = req.body;
 
   if (!question || !question.trim()) {
     return res.status(400).json({
@@ -73,6 +73,7 @@ export const createQuestion = async (req, res) => {
 
     try {
       labQuestion = await LabQuestion.create({
+        experimentNo: experimentNo ? Number(experimentNo) : null,
         question: question.trim(),
         code: code?.trim() || null,
         ops,
@@ -176,7 +177,7 @@ export const getQuestion = async (req, res) => {
 // Update question
 export const updateQuestion = async (req, res) => {
   const { id } = req.params;
-  const { question, code, subjectId, labDate } = req.body;
+  const { experimentNo, question, code, subjectId, labDate } = req.body;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return res.status(400).json({
@@ -197,6 +198,12 @@ export const updateQuestion = async (req, res) => {
         success: false,
       });
     }
+
+    // update experimentNo
+    if (experimentNo !== undefined) {
+      labQuestion.experimentNo = experimentNo === "" ? null : Number(experimentNo);
+    }
+
 
     // Update question
     if (question !== undefined) {

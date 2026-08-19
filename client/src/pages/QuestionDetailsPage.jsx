@@ -20,6 +20,7 @@ export default function QuestionDetailsPage({ questionId, onBack }) {
     question: "",
     code: "",
     subjectId: "",
+    experimentNo: "",
     labDate: "",
     ops: null
   });
@@ -39,6 +40,7 @@ export default function QuestionDetailsPage({ questionId, onBack }) {
         question: data.question || "",
         code: data.code || "",
         subjectId: data.subjectId?._id || data.subjectId || "",
+        experimentNo: data.experimentNo !== null && data.experimentNo !== undefined ? data.experimentNo : "",
         labDate: data.labDate ? new Date(data.labDate).toISOString().split("T")[0] : "",
         ops: null
       });
@@ -103,8 +105,19 @@ export default function QuestionDetailsPage({ questionId, onBack }) {
     formData.append("question", editFormData.question);
     formData.append("code", editFormData.code);
     formData.append("subjectId", editFormData.subjectId);
-    if (editFormData.labDate) formData.append("labDate", editFormData.labDate);
-    if (editFormData.ops) formData.append("ops", editFormData.ops);
+    
+    if (editFormData.labDate) {
+      formData.append("labDate", editFormData.labDate);
+    } else {
+      formData.append("labDate", "");
+    }
+    
+    if (editFormData.ops) {
+      formData.append("ops", editFormData.ops);
+    }
+
+    // Fix: Always append experimentNo (even if empty string so backend can catch it as null)
+    formData.append("experimentNo", editFormData.experimentNo);
 
     try {
       const res = await axiosInstance.patch(
@@ -120,7 +133,7 @@ export default function QuestionDetailsPage({ questionId, onBack }) {
       if (res.data?.success || res.status === 200) {
         toast.success("Question updated successfully!");
         setIsEditOpen(false);
-        await fetchQuestionDetails(); 
+        await fetchQuestionDetails();
       }
     } catch (err) {
       console.error("Error updating question:", err);
@@ -146,7 +159,7 @@ export default function QuestionDetailsPage({ questionId, onBack }) {
 
         {/* Action Group */}
         <div className="flex items-center gap-2">
-          {/* 🟢 Delete Button */}
+          {/* Delete Button */}
           <button
             onClick={handleDeleteQuestion}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 dark:bg-red-950/40 dark:hover:bg-red-900/60 text-red-600 dark:text-red-400 text-xs sm:text-sm font-medium transition-all border border-red-200 dark:border-red-900/50 cursor-pointer"
@@ -172,12 +185,22 @@ export default function QuestionDetailsPage({ questionId, onBack }) {
         {/* Header Info */}
         <div className="space-y-3 pb-4 border-b border-slate-100 dark:border-slate-800">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 text-xs font-semibold">
+            {/* Experiment No Badge (Glowing Indigo style) */}
+            {question.experimentNo !== null && question.experimentNo !== undefined && (
+              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-md bg-indigo-600 text-white text-xs font-bold shadow-[0_0_20px_rgba(79,70,229,0.5)]">
+                Exp No: {question.experimentNo}
+              </span>
+            )}
+
+            {/* Subject Badge (Standard style) */}
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold">
               <BookOpen className="w-3.5 h-3.5" />
               {question.subjectId?.name || "General"}
             </span>
+
+            {/* Lab Date Badge (Standard style - same as Subject) */}
             {question.labDate && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-medium">
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold">
                 <Calendar className="w-3.5 h-3.5" />
                 {new Date(question.labDate).toLocaleDateString("en-US", {
                   month: "short",
@@ -253,7 +276,7 @@ export default function QuestionDetailsPage({ questionId, onBack }) {
               </h2>
               <button
                 onClick={() => setIsEditOpen(false)}
-                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -262,22 +285,9 @@ export default function QuestionDetailsPage({ questionId, onBack }) {
             {/* Form */}
             <form onSubmit={handleUpdateSubmit} className="space-y-4">
 
-              {/* Question Text */}
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Question *
-                </label>
-                <textarea
-                  required
-                  rows={3}
-                  value={editFormData.question}
-                  onChange={(e) => setEditFormData({ ...editFormData, question: e.target.value })}
-                  className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600"
-                />
-              </div>
-
-              {/* Subject & Lab Date Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* Subject, Experiment No & Lab Date Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {/* Subject Selection */}
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                     Subject *
@@ -297,6 +307,22 @@ export default function QuestionDetailsPage({ questionId, onBack }) {
                   </select>
                 </div>
 
+                {/* Experiment No Field */}
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                    Experiment No
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    placeholder="e.g. 0, 1, 2..."
+                    value={editFormData.experimentNo}
+                    onChange={(e) => setEditFormData({ ...editFormData, experimentNo: e.target.value })}
+                    className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600"
+                  />
+                </div>
+
+                {/* Lab Date Field */}
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                     Lab Date
@@ -308,6 +334,20 @@ export default function QuestionDetailsPage({ questionId, onBack }) {
                     className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600"
                   />
                 </div>
+              </div>
+
+              {/* Question Text */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  Question *
+                </label>
+                <textarea
+                  required
+                  rows={3}
+                  value={editFormData.question}
+                  onChange={(e) => setEditFormData({ ...editFormData, question: e.target.value })}
+                  className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600"
+                />
               </div>
 
               {/* Code Textarea */}
@@ -323,10 +363,10 @@ export default function QuestionDetailsPage({ questionId, onBack }) {
                 />
               </div>
 
-              {/* Replace Image Upload */}
+              {/* Image Upload */}
               <div>
                 <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Replace Output Image (Optional)
+                  {question?.ops?.url ? "Replace Output Image (Optional)" : "Add Output Image (Optional)"}
                 </label>
                 <div className="flex items-center gap-2">
                   <label className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-medium cursor-pointer transition-colors border border-slate-200 dark:border-slate-700">
@@ -343,7 +383,7 @@ export default function QuestionDetailsPage({ questionId, onBack }) {
                     <button
                       type="button"
                       onClick={() => setEditFormData({ ...editFormData, ops: null })}
-                      className="text-xs text-red-500 hover:underline"
+                      className="text-xs text-red-500 hover:underline cursor-pointer"
                     >
                       Remove
                     </button>
@@ -356,13 +396,13 @@ export default function QuestionDetailsPage({ questionId, onBack }) {
                 <button
                   type="button"
                   onClick={() => setIsEditOpen(false)}
-                  className="px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 text-xs font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                  className="px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 text-xs font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium transition-colors"
+                  className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium transition-colors cursor-pointer"
                 >
                   Save Changes
                 </button>
